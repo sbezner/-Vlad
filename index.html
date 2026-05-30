@@ -217,9 +217,10 @@
     <div class="border-t border-inkborder">
       <div class="max-w-7xl mx-auto px-5 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-gray-500 text-sm">
         <p>© <span id="year"></span> Vlad’s Jewelers. All rights reserved.</p>
-        <!-- Subtle hidden admin access: the diamond icon. Tap/click to open the admin login. -->
+        <!-- Subtle hidden admin access: the diamond icon. Tap/click to open the admin login.
+             Padding gives a comfortable ~44px touch target on mobile without drawing attention. -->
         <button id="adminTrigger" title="•" aria-label="Admin access"
-          class="text-gray-700 hover:text-gold transition-colors text-lg leading-none select-none">
+          class="-m-2 p-2 inline-flex items-center justify-center text-gray-700 hover:text-gold active:text-gold transition-colors text-xl leading-none select-none">
           ◆
         </button>
       </div>
@@ -227,73 +228,79 @@
   </footer>
 
   <!-- =====================  ADMIN LOGIN MODAL  ===================== -->
-  <div id="loginModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/70 modal-backdrop p-4">
-    <div class="bg-ink border border-inkborder rounded-2xl w-full max-w-md p-8 relative shadow-2xl">
-      <button data-close-login class="absolute top-4 right-4 text-gray-500 hover:text-gold text-2xl leading-none">&times;</button>
-      <h3 class="font-serif text-3xl mb-2">Admin <span class="text-gold-gradient">Access</span></h3>
-      <p class="text-gray-400 text-sm mb-6">Restricted area. Please enter your credentials.</p>
-      <form id="loginForm" class="space-y-4">
-        <div>
-          <label class="block text-sm text-gray-400 mb-1">Username</label>
-          <input id="adminUsername" type="text" autocomplete="off"
-            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
-        </div>
-        <p id="loginError" class="hidden text-red-400 text-sm">Access denied. Invalid username.</p>
-        <button type="submit" class="w-full py-3 rounded-lg bg-gold text-charcoal font-semibold hover:bg-champagne transition-colors">Unlock Dashboard</button>
-      </form>
-      <p class="text-gray-600 text-xs mt-4 text-center">Hint: this panel belongs to the owner.</p>
+  <!-- Outer is a full-screen scroll container; inner flex-wrapper centers when content fits
+       and scrolls from the top when it doesn't (keeps the top reachable on small screens). -->
+  <div id="loginModal" class="hidden fixed inset-0 z-50 bg-black/70 modal-backdrop overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="modal-panel bg-ink border border-inkborder rounded-2xl w-full max-w-md p-6 sm:p-8 relative shadow-2xl">
+        <button data-close-login aria-label="Close" class="absolute top-2 right-2 w-11 h-11 flex items-center justify-center text-gray-500 hover:text-gold text-3xl leading-none rounded-full">&times;</button>
+        <h3 class="font-serif text-3xl mb-2 pr-8">Admin <span class="text-gold-gradient">Access</span></h3>
+        <p class="text-gray-400 text-sm mb-6">Restricted area. Please enter your credentials.</p>
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">Username</label>
+            <input id="adminUsername" type="text" autocomplete="off" autocapitalize="none" autocorrect="off"
+              class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 text-base outline-none transition-colors" />
+          </div>
+          <p id="loginError" class="hidden text-red-400 text-sm">Access denied. Invalid username.</p>
+          <button type="submit" class="w-full py-3 rounded-lg bg-gold text-charcoal font-semibold hover:bg-champagne transition-colors">Unlock Dashboard</button>
+        </form>
+        <p class="text-gray-600 text-xs mt-4 text-center">Hint: this panel belongs to the owner.</p>
+      </div>
     </div>
   </div>
 
   <!-- =====================  ADMIN DASHBOARD MODAL  ===================== -->
-  <div id="adminModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/70 modal-backdrop p-4 overflow-y-auto">
-    <div class="bg-ink border border-gold/40 rounded-2xl w-full max-w-2xl p-8 my-8 relative shadow-2xl shadow-gold/10">
-      <button data-close-admin class="absolute top-4 right-4 text-gray-500 hover:text-gold text-2xl leading-none">&times;</button>
+  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-black/70 modal-backdrop overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="modal-panel bg-ink border border-gold/40 rounded-2xl w-full max-w-2xl p-6 sm:p-8 relative shadow-2xl shadow-gold/10">
+        <button data-close-admin aria-label="Close" class="absolute top-2 right-2 w-11 h-11 flex items-center justify-center text-gray-500 hover:text-gold text-3xl leading-none rounded-full">&times;</button>
 
-      <div class="flex items-center gap-3 mb-1">
-        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gold text-charcoal font-serif">V</span>
-        <h3 class="font-serif text-3xl">Vlad’s <span class="text-gold-gradient">Dashboard</span></h3>
-      </div>
-      <p class="text-gray-400 text-sm mb-6">Add a new piece to the collection. It will appear instantly and persist on this device.</p>
+        <div class="flex items-center gap-3 mb-1 pr-10">
+          <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold text-charcoal font-serif">V</span>
+          <h3 class="font-serif text-3xl">Vlad’s <span class="text-gold-gradient">Dashboard</span></h3>
+        </div>
+        <p class="text-gray-400 text-sm mb-6">Add a new piece to the collection. It will appear instantly and persist on this device.</p>
 
-      <form id="addProductForm" class="grid sm:grid-cols-2 gap-4">
-        <div class="sm:col-span-2">
-          <label class="block text-sm text-gray-400 mb-1">Title</label>
-          <input name="title" required type="text" placeholder="18k Gold Diamond Eternity Ring"
-            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
-        </div>
-        <div>
-          <label class="block text-sm text-gray-400 mb-1">Price (USD)</label>
-          <input name="price" required type="number" min="0" step="0.01" placeholder="2450"
-            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
-        </div>
-        <div>
-          <label class="block text-sm text-gray-400 mb-1">Image URL</label>
-          <input name="image" required type="url" placeholder="https://…"
-            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
-        </div>
-        <div class="sm:col-span-2">
-          <label class="block text-sm text-gray-400 mb-1">Description</label>
-          <textarea name="description" required rows="3" placeholder="A brilliant band of channel-set diamonds…"
-            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors resize-none"></textarea>
-        </div>
-        <div class="sm:col-span-2">
-          <label class="block text-sm text-gray-400 mb-1">Venmo Link <span class="text-gray-600">(optional — defaults to @Vlads-Jewelers)</span></label>
-          <input name="venmo" type="url" placeholder="https://venmo.com/u/Vlads-Jewelers"
-            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
-        </div>
-        <div class="sm:col-span-2 flex flex-col sm:flex-row gap-3 mt-2">
-          <button type="submit" class="flex-1 py-3 rounded-lg bg-gold text-charcoal font-semibold hover:bg-champagne transition-colors">Add Product</button>
-          <button type="button" id="logoutBtn" class="px-6 py-3 rounded-lg border border-inkborder text-gray-300 hover:border-red-400 hover:text-red-400 transition-colors">Log Out</button>
-        </div>
-      </form>
+        <form id="addProductForm" class="grid sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="block text-sm text-gray-400 mb-1">Title</label>
+            <input name="title" required type="text" placeholder="18k Gold Diamond Eternity Ring"
+              class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 text-base outline-none transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">Price (USD)</label>
+            <input name="price" required type="number" inputmode="decimal" min="0" step="0.01" placeholder="2450"
+              class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 text-base outline-none transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">Image URL</label>
+            <input name="image" required type="url" inputmode="url" autocapitalize="none" placeholder="https://…"
+              class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 text-base outline-none transition-colors" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-sm text-gray-400 mb-1">Description</label>
+            <textarea name="description" required rows="3" placeholder="A brilliant band of channel-set diamonds…"
+              class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 text-base outline-none transition-colors resize-none"></textarea>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-sm text-gray-400 mb-1">Venmo Link <span class="text-gray-600">(optional — defaults to @Vlads-Jewelers)</span></label>
+            <input name="venmo" type="url" inputmode="url" autocapitalize="none" placeholder="https://venmo.com/u/Vlads-Jewelers"
+              class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 text-base outline-none transition-colors" />
+          </div>
+          <div class="sm:col-span-2 flex flex-col sm:flex-row gap-3 mt-2">
+            <button type="submit" class="flex-1 py-3 rounded-lg bg-gold text-charcoal font-semibold hover:bg-champagne transition-colors">Add Product</button>
+            <button type="button" id="logoutBtn" class="px-6 py-3 rounded-lg border border-inkborder text-gray-300 hover:border-red-400 hover:text-red-400 transition-colors">Log Out</button>
+          </div>
+        </form>
 
-      <div class="mt-6 pt-6 border-t border-inkborder">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-sm text-gray-400">Custom products you’ve added (<span id="customCount">0</span>)</p>
-          <button id="resetBtn" class="text-xs text-gray-500 hover:text-red-400 transition-colors">Reset to defaults</button>
+        <div class="mt-6 pt-6 border-t border-inkborder">
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <p class="text-sm text-gray-400">Custom products you’ve added (<span id="customCount">0</span>)</p>
+            <button id="resetBtn" class="text-xs text-gray-500 hover:text-red-400 transition-colors whitespace-nowrap">Reset to defaults</button>
+          </div>
+          <p class="text-gray-600 text-xs">Seed products cannot be removed; your additions are stored in this browser’s localStorage.</p>
         </div>
-        <p class="text-gray-600 text-xs">Seed products cannot be removed; your additions are stored in this browser’s localStorage.</p>
       </div>
     </div>
   </div>
@@ -528,25 +535,35 @@
     }
 
     /* ---------- Admin: login / logout ---------- */
+    // Lock/unlock background page scroll while any modal is open (better mobile UX).
+    function lockScroll() { document.body.classList.add('overflow-hidden'); }
+    function unlockScroll() {
+      if (loginModal.classList.contains('hidden') && adminModal.classList.contains('hidden')) {
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
     function openLogin() {
       loginError.classList.add('hidden');
       adminUsernameInput.value = '';
       loginModal.classList.remove('hidden');
-      loginModal.classList.add('flex');
+      loginModal.scrollTop = 0;       // ensure the top of the modal is in view
+      lockScroll();
       setTimeout(() => adminUsernameInput.focus(), 50);
     }
     function closeLogin() {
       loginModal.classList.add('hidden');
-      loginModal.classList.remove('flex');
+      unlockScroll();
     }
     function openAdmin() {
       updateCustomCount();
       adminModal.classList.remove('hidden');
-      adminModal.classList.add('flex');
+      adminModal.scrollTop = 0;       // start at the top of the form
+      lockScroll();
     }
     function closeAdmin() {
       adminModal.classList.add('hidden');
-      adminModal.classList.remove('flex');
+      unlockScroll();
     }
     function updateCustomCount() {
       customCountEl.textContent = customProducts.length;
@@ -585,8 +602,9 @@
     // Close buttons + backdrop clicks
     document.querySelectorAll('[data-close-login]').forEach((b) => b.addEventListener('click', closeLogin));
     document.querySelectorAll('[data-close-admin]').forEach((b) => b.addEventListener('click', closeAdmin));
-    loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeLogin(); });
-    adminModal.addEventListener('click', (e) => { if (e.target === adminModal) closeAdmin(); });
+    // Close when tapping the backdrop (anywhere outside the panel).
+    loginModal.addEventListener('click', (e) => { if (!e.target.closest('.modal-panel')) closeLogin(); });
+    adminModal.addEventListener('click', (e) => { if (!e.target.closest('.modal-panel')) closeAdmin(); });
 
     // Add product
     addProductForm.addEventListener('submit', (e) => {
