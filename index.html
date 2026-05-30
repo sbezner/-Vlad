@@ -96,11 +96,15 @@
         <a href="#collection" class="hover:text-gold transition-colors">Collection</a>
         <a href="#about" class="hover:text-gold transition-colors">About</a>
         <a href="#contact" class="hover:text-gold transition-colors">Contact</a>
+        <a href="#" class="admin-nav-link hover:text-gold transition-colors">Admin</a>
         <a href="#collection" class="px-5 py-2 rounded-full border border-gold text-gold hover:bg-gold hover:text-charcoal transition-colors font-medium">Shop Now</a>
       </div>
 
-      <!-- Mobile shop button -->
-      <a href="#collection" class="md:hidden px-4 py-2 rounded-full border border-gold text-gold text-sm font-medium">Shop</a>
+      <!-- Mobile links: Admin + Shop -->
+      <div class="md:hidden flex items-center gap-4">
+        <a href="#" class="admin-nav-link text-gray-300 hover:text-gold transition-colors text-sm">Admin</a>
+        <a href="#collection" class="px-4 py-2 rounded-full border border-gold text-gold text-sm font-medium">Shop</a>
+      </div>
     </nav>
   </header>
 
@@ -260,7 +264,13 @@
           <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold text-charcoal font-serif">V</span>
           <h3 class="font-serif text-3xl">Vlad’s <span class="text-gold-gradient">Dashboard</span></h3>
         </div>
-        <p class="text-gray-400 text-sm mb-6">Add a new piece to the collection. It will appear instantly and persist on this device.</p>
+        <p id="adminIntro" class="text-gray-400 text-sm mb-6">Add a new piece to the collection. It will appear instantly and persist on this device.</p>
+
+        <!-- Edit-mode banner (shown only while editing an existing product) -->
+        <div id="editBanner" class="hidden mb-4 flex items-center justify-between gap-3 bg-gold/10 border border-gold/40 rounded-lg px-4 py-3">
+          <p class="text-sm text-champagne">Editing: <span id="editingName" class="font-semibold"></span></p>
+          <button type="button" id="cancelEditBtn" class="text-xs text-gray-300 hover:text-gold transition-colors whitespace-nowrap">Cancel edit</button>
+        </div>
 
         <form id="addProductForm" class="grid sm:grid-cols-2 gap-4">
           <div class="sm:col-span-2">
@@ -289,17 +299,17 @@
               class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 text-base outline-none transition-colors" />
           </div>
           <div class="sm:col-span-2 flex flex-col sm:flex-row gap-3 mt-2">
-            <button type="submit" class="flex-1 py-3 rounded-lg bg-gold text-charcoal font-semibold hover:bg-champagne transition-colors">Add Product</button>
+            <button type="submit" id="submitBtn" class="flex-1 py-3 rounded-lg bg-gold text-charcoal font-semibold hover:bg-champagne transition-colors">Add Product</button>
             <button type="button" id="logoutBtn" class="px-6 py-3 rounded-lg border border-inkborder text-gray-300 hover:border-red-400 hover:text-red-400 transition-colors">Log Out</button>
           </div>
         </form>
 
         <div class="mt-6 pt-6 border-t border-inkborder">
           <div class="flex items-center justify-between gap-3 mb-2">
-            <p class="text-sm text-gray-400">Custom products you’ve added (<span id="customCount">0</span>)</p>
+            <p class="text-sm text-gray-400">Added: <span id="customCount">0</span> · Edited: <span id="editCount">0</span> · Hidden: <span id="hiddenCount">0</span></p>
             <button id="resetBtn" class="text-xs text-gray-500 hover:text-red-400 transition-colors whitespace-nowrap">Reset to defaults</button>
           </div>
-          <p class="text-gray-600 text-xs">Seed products cannot be removed; your additions are stored in this browser’s localStorage.</p>
+          <p class="text-gray-600 text-xs">Close this panel and use the <span class="text-gold">Edit</span> / <span class="text-gold">Delete</span> buttons on each product card to change it. All changes are stored in this browser’s localStorage; “Reset to defaults” restores the original collection.</p>
         </div>
       </div>
     </div>
@@ -319,7 +329,9 @@
       email: 'vlad@example.com',                   // default inquiry email
       adminUsername: 'vlad',                       // case-insensitive; "Vlad" unlocks the panel
     };
-    const STORAGE_KEY = 'vlads_custom_products';   // localStorage key for admin-added products
+    const STORAGE_KEY = 'vlads_custom_products';   // admin-added products
+    const OVERRIDES_KEY = 'vlads_product_overrides'; // edits applied to existing products (by id)
+    const HIDDEN_KEY = 'vlads_hidden_products';    // ids of products hidden/deleted by admin
 
     /* ---------- Seed data: 10 high-end jewelry products ---------- */
     /* Images are reliable Unsplash CDN URLs sized for cards. */
@@ -397,9 +409,12 @@
     ];
 
     /* ---------- State ---------- */
-    let customProducts = loadCustomProducts(); // newest-first array from localStorage
-    let allProducts = [];                      // combined list (custom prepended)
+    let customProducts = loadJSON(STORAGE_KEY, []);   // admin-added products, newest-first
+    let overrides = loadJSON(OVERRIDES_KEY, {});      // { [id]: {title, price, ...} } edits to existing products
+    let hiddenIds = loadJSON(HIDDEN_KEY, []);         // ids the admin has deleted/hidden
+    let allProducts = [];                             // combined, effective list used for rendering
     let isAdmin = false;
+    let editingId = null;                             // id of the product currently being edited (null = add mode)
 
     /* ---------- DOM references ---------- */
     const grid = document.getElementById('productGrid');
@@ -414,32 +429,49 @@
     const adminUsernameInput = document.getElementById('adminUsername');
     const addProductForm = document.getElementById('addProductForm');
     const customCountEl = document.getElementById('customCount');
+    const editCountEl = document.getElementById('editCount');
+    const hiddenCountEl = document.getElementById('hiddenCount');
+    const adminIntro = document.getElementById('adminIntro');
+    const editBanner = document.getElementById('editBanner');
+    const editingNameEl = document.getElementById('editingName');
+    const submitBtn = document.getElementById('submitBtn');
     const toast = document.getElementById('toast');
 
     /* ---------- Utilities ---------- */
-    function loadCustomProducts() {
+    // Generic, fault-tolerant JSON loader with a typed fallback.
+    function loadJSON(key, fallback) {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        // Keep the shape consistent with the fallback (array vs object).
+        if (Array.isArray(fallback) && !Array.isArray(parsed)) return fallback;
+        return parsed ?? fallback;
       } catch (e) {
-        console.warn('Could not read stored products:', e);
-        return [];
+        console.warn('Could not read', key, e);
+        return fallback;
       }
     }
 
-    function saveCustomProducts() {
+    function saveJSON(key, value) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(customProducts));
+        localStorage.setItem(key, JSON.stringify(value));
       } catch (e) {
-        console.warn('Could not save products:', e);
+        console.warn('Could not save', key, e);
         showToast('Could not save — storage unavailable.');
       }
     }
 
+    const saveCustomProducts = () => saveJSON(STORAGE_KEY, customProducts);
+    const saveOverrides = () => saveJSON(OVERRIDES_KEY, overrides);
+    const saveHidden = () => saveJSON(HIDDEN_KEY, hiddenIds);
+
     function rebuildAllProducts() {
-      // Custom (admin-added) products are prepended, newest first.
-      allProducts = [...customProducts, ...SEED_PRODUCTS];
+      // Custom (admin-added) products are prepended, newest first; then the seed catalog.
+      // Hidden ids are removed, and per-product edits (overrides) are merged on top.
+      allProducts = [...customProducts, ...SEED_PRODUCTS]
+        .filter((p) => !hiddenIds.includes(p.id))
+        .map((p) => (overrides[p.id] ? { ...p, ...overrides[p.id] } : p));
     }
 
     function formatPrice(value) {
@@ -513,6 +545,17 @@
                 Inquire via Email
               </a>
             </div>
+            ${isAdmin ? `
+            <div class="flex gap-2 mt-3 pt-3 border-t border-inkborder">
+              <button type="button" data-edit-id="${escapeHtml(p.id)}"
+                class="flex-1 text-center py-2 rounded-lg border border-inkborder text-gray-300 text-sm hover:border-gold hover:text-gold transition-colors">
+                ✎ Edit
+              </button>
+              <button type="button" data-delete-id="${escapeHtml(p.id)}"
+                class="flex-1 text-center py-2 rounded-lg border border-inkborder text-gray-300 text-sm hover:border-red-400 hover:text-red-400 transition-colors">
+                ✕ Delete
+              </button>
+            </div>` : ''}
           </div>
         `;
         grid.appendChild(card);
@@ -556,7 +599,7 @@
       unlockScroll();
     }
     function openAdmin() {
-      updateCustomCount();
+      updateCounts();
       adminModal.classList.remove('hidden');
       adminModal.scrollTop = 0;       // start at the top of the form
       lockScroll();
@@ -565,24 +608,93 @@
       adminModal.classList.add('hidden');
       unlockScroll();
     }
-    function updateCustomCount() {
+    function updateCounts() {
       customCountEl.textContent = customProducts.length;
+      editCountEl.textContent = Object.keys(overrides).length;
+      hiddenCountEl.textContent = hiddenIds.length;
+    }
+
+    /* ---------- Admin: add vs edit modes ---------- */
+    // Switch the dashboard form back to "add a new product" mode.
+    function setAddMode() {
+      editingId = null;
+      addProductForm.reset();
+      editBanner.classList.add('hidden');
+      adminIntro.classList.remove('hidden');
+      submitBtn.textContent = 'Add Product';
+    }
+
+    // Populate the form with an existing product and switch to "edit" mode.
+    function startEdit(id) {
+      const p = allProducts.find((x) => x.id === id);
+      if (!p) return;
+      editingId = id;
+      addProductForm.title.value = decodeEntities(p.title);
+      addProductForm.price.value = p.price;
+      addProductForm.description.value = decodeEntities(p.description);
+      addProductForm.image.value = p.image;
+      addProductForm.venmo.value = p.venmo || '';
+      editingNameEl.textContent = decodeEntities(p.title);
+      editBanner.classList.remove('hidden');
+      adminIntro.classList.add('hidden');
+      submitBtn.textContent = 'Save Changes';
+      openAdmin();
+    }
+
+    // Delete (custom products are removed; seed products are hidden so Reset can restore them).
+    function deleteProduct(id) {
+      const p = allProducts.find((x) => x.id === id);
+      const name = p ? decodeEntities(p.title) : 'this product';
+      if (!confirm(`Remove “${name}” from the collection?`)) return;
+
+      if (id.startsWith('custom-')) {
+        customProducts = customProducts.filter((x) => x.id !== id);
+        saveCustomProducts();
+      } else if (!hiddenIds.includes(id)) {
+        hiddenIds.push(id);
+        saveHidden();
+      }
+      // Drop any stored edit for a product that no longer shows.
+      if (overrides[id]) { delete overrides[id]; saveOverrides(); }
+      if (editingId === id) setAddMode();
+
+      rebuildAllProducts();
+      applySearch();
+      updateCounts();
+      showToast('Product removed.');
     }
 
     /* ---------- Event wiring ---------- */
 
-    // Hidden admin trigger (diamond in footer)
+    // Open the dashboard in a clean "add" state.
+    function openDashboard() { setAddMode(); openAdmin(); }
+
+    // Hidden admin triggers: footer diamond + the nav "Admin" link.
     document.getElementById('adminTrigger').addEventListener('click', () => {
-      if (isAdmin) { openAdmin(); } else { openLogin(); }
+      if (isAdmin) { openDashboard(); } else { openLogin(); }
+    });
+    document.querySelectorAll('.admin-nav-link').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (isAdmin) { openDashboard(); } else { openLogin(); }
+      });
     });
 
     // Secret key combo as an alternative: Ctrl/Cmd + Shift + V
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'V' || e.key === 'v')) {
         e.preventDefault();
-        if (isAdmin) { openAdmin(); } else { openLogin(); }
+        if (isAdmin) { openDashboard(); } else { openLogin(); }
       }
       if (e.key === 'Escape') { closeLogin(); closeAdmin(); }
+    });
+
+    // Edit / Delete buttons on product cards (event delegation).
+    grid.addEventListener('click', (e) => {
+      const editBtn = e.target.closest('[data-edit-id]');
+      const delBtn = e.target.closest('[data-delete-id]');
+      if (editBtn) { startEdit(editBtn.dataset.editId); }
+      else if (delBtn) { deleteProduct(delBtn.dataset.deleteId); }
     });
 
     // Login submit
@@ -592,7 +704,8 @@
       if (entered === OWNER.adminUsername) {
         isAdmin = true;
         closeLogin();
-        openAdmin();
+        applySearch();        // re-render cards so Edit/Delete controls appear
+        openDashboard();
         showToast('Welcome back, Vlad ✦');
       } else {
         loginError.classList.remove('hidden');
@@ -606,12 +719,11 @@
     loginModal.addEventListener('click', (e) => { if (!e.target.closest('.modal-panel')) closeLogin(); });
     adminModal.addEventListener('click', (e) => { if (!e.target.closest('.modal-panel')) closeAdmin(); });
 
-    // Add product
+    // Add OR save an edited product (one form serves both modes).
     addProductForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const fd = new FormData(addProductForm);
-      const product = {
-        id: 'custom-' + Date.now(),
+      const fields = {
         title: String(fd.get('title')).trim(),
         price: Number(fd.get('price')) || 0,
         description: String(fd.get('description')).trim(),
@@ -619,36 +731,67 @@
         venmo: String(fd.get('venmo') || '').trim(),
       };
 
-      if (!product.title || !product.image || !product.description) {
+      if (!fields.title || !fields.image || !fields.description) {
         showToast('Please fill in all required fields.');
         return;
       }
 
-      customProducts.unshift(product); // prepend → appears first in gallery
-      saveCustomProducts();
-      rebuildAllProducts();
-      searchInput.value = '';          // clear search so the new item is visible
-      applySearch();
-      updateCustomCount();
-      addProductForm.reset();
-      showToast('Product added to the collection ✦');
+      if (editingId) {
+        // ----- EDIT MODE -----
+        if (editingId.startsWith('custom-')) {
+          // Update the admin-added product in place.
+          const idx = customProducts.findIndex((x) => x.id === editingId);
+          if (idx !== -1) customProducts[idx] = { ...customProducts[idx], ...fields };
+          saveCustomProducts();
+        } else {
+          // Store an override on top of the seed product.
+          overrides[editingId] = { ...(overrides[editingId] || {}), ...fields };
+          saveOverrides();
+        }
+        rebuildAllProducts();
+        applySearch();
+        updateCounts();
+        setAddMode();
+        showToast('Changes saved ✦');
+      } else {
+        // ----- ADD MODE -----
+        const product = { id: 'custom-' + Date.now(), ...fields };
+        customProducts.unshift(product); // prepend → appears first in gallery
+        saveCustomProducts();
+        rebuildAllProducts();
+        searchInput.value = '';          // clear search so the new item is visible
+        applySearch();
+        updateCounts();
+        addProductForm.reset();
+        showToast('Product added to the collection ✦');
+      }
     });
+
+    // Cancel an in-progress edit
+    document.getElementById('cancelEditBtn').addEventListener('click', setAddMode);
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
       isAdmin = false;
+      setAddMode();
       closeAdmin();
+      applySearch();           // re-render cards so Edit/Delete controls disappear
       showToast('Logged out.');
     });
 
-    // Reset to default seed products
+    // Reset everything (added, edited, and hidden) back to the original collection
     document.getElementById('resetBtn').addEventListener('click', () => {
-      if (!confirm('Remove all custom products and reset to the default collection?')) return;
+      if (!confirm('Discard ALL changes — added products, edits, and deletions — and restore the original collection?')) return;
       customProducts = [];
+      overrides = {};
+      hiddenIds = [];
       saveCustomProducts();
+      saveOverrides();
+      saveHidden();
+      setAddMode();
       rebuildAllProducts();
       applySearch();
-      updateCustomCount();
+      updateCounts();
       showToast('Collection reset to defaults.');
     });
 
