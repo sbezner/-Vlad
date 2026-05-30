@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vlad’s Jewelers — Fine Jewelry &amp; Timepieces</title>
+  <meta name="description" content="Vlad’s Jewelers — a curated collection of high-end rings, necklaces, bracelets, and watches. Handcrafted luxury, timeless elegance." />
+
+  <!-- Tailwind CSS (CDN). For production you'd compile this; CDN is fine for a static GitHub Pages showcase. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind theme configuration: define our luxury palette + fonts -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#D4AF37',        // primary accent
+            champagne: '#F7E7CE',   // soft accent / highlight text
+            charcoal: '#0E0E10',    // page background
+            ink: '#141417',         // card background
+            inkborder: '#26262B',   // subtle borders
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['"Inter"', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Google Fonts: elegant serif for headings, clean sans for body -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ---- Base ---- */
+    body { background-color: #0E0E10; font-family: 'Inter', system-ui, sans-serif; }
+    h1, h2, h3, .font-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    /* Thin gold scrollbar for a refined touch */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #0E0E10; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2f; border-radius: 6px; }
+    ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+
+    /* Hero background: dark gradient over a luxury image */
+    .hero-bg {
+      background:
+        linear-gradient(180deg, rgba(14,14,16,0.55) 0%, rgba(14,14,16,0.85) 70%, rgba(14,14,16,1) 100%),
+        url('https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+    }
+
+    /* Product card hover: gold glow + image zoom (defined as utility classes via @layer-like raw CSS) */
+    .product-card { transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
+    .product-card:hover {
+      transform: translateY(-6px);
+      border-color: #D4AF37;
+      box-shadow: 0 12px 40px -12px rgba(212,175,55,0.45);
+    }
+    .product-card img { transition: transform .6s ease; }
+    .product-card:hover img { transform: scale(1.08); }
+
+    /* Gold gradient text utility */
+    .text-gold-gradient {
+      background: linear-gradient(90deg, #F7E7CE, #D4AF37, #b8902b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Subtle entrance animation for the grid */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp .5s ease both; }
+
+    /* Modal backdrop blur */
+    .modal-backdrop { backdrop-filter: blur(4px); }
+  </style>
+</head>
+
+<body class="text-white antialiased selection:bg-gold/30">
+
+  <!-- =====================  STICKY NAVIGATION  ===================== -->
+  <header class="sticky top-0 z-40 bg-charcoal/85 backdrop-blur-md border-b border-inkborder">
+    <nav class="max-w-7xl mx-auto px-5 sm:px-8 h-20 flex items-center justify-between">
+      <!-- Brand -->
+      <a href="#top" class="flex items-center gap-3 group">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold text-gold font-serif text-xl group-hover:bg-gold group-hover:text-charcoal transition-colors">V</span>
+        <span class="font-serif text-2xl tracking-wide">Vlad’s <span class="text-gold-gradient">Jewelers</span></span>
+      </a>
+
+      <!-- Desktop links -->
+      <div class="hidden md:flex items-center gap-9 text-sm tracking-wide text-gray-300">
+        <a href="#collection" class="hover:text-gold transition-colors">Collection</a>
+        <a href="#about" class="hover:text-gold transition-colors">About</a>
+        <a href="#contact" class="hover:text-gold transition-colors">Contact</a>
+        <a href="#collection" class="px-5 py-2 rounded-full border border-gold text-gold hover:bg-gold hover:text-charcoal transition-colors font-medium">Shop Now</a>
+      </div>
+
+      <!-- Mobile shop button -->
+      <a href="#collection" class="md:hidden px-4 py-2 rounded-full border border-gold text-gold text-sm font-medium">Shop</a>
+    </nav>
+  </header>
+
+  <a id="top"></a>
+
+  <!-- =====================  HERO BANNER  ===================== -->
+  <section class="hero-bg relative">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 py-28 md:py-40 text-center">
+      <p class="uppercase tracking-[0.35em] text-gold text-xs sm:text-sm mb-5">Est. — Fine Jewelry &amp; Timepieces</p>
+      <h1 class="font-serif text-5xl sm:text-6xl md:text-7xl leading-tight mb-6">
+        Timeless Elegance,<br /><span class="text-gold-gradient">Handcrafted for You</span>
+      </h1>
+      <p class="max-w-2xl mx-auto text-gray-300 text-lg leading-relaxed mb-10">
+        Discover a curated collection of exquisite rings, necklaces, bracelets, and watches —
+        each piece a statement of luxury, precision, and enduring beauty.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#collection" class="px-8 py-3 rounded-full bg-gold text-charcoal font-semibold tracking-wide hover:bg-champagne transition-colors shadow-lg shadow-gold/20">
+          Explore the Collection
+        </a>
+        <a href="#contact" class="px-8 py-3 rounded-full border border-white/30 text-white font-medium tracking-wide hover:border-gold hover:text-gold transition-colors">
+          Make an Inquiry
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================  COLLECTION + SEARCH  ===================== -->
+  <main id="collection" class="max-w-7xl mx-auto px-5 sm:px-8 py-20">
+    <div class="text-center mb-12">
+      <h2 class="font-serif text-4xl sm:text-5xl mb-3">The <span class="text-gold-gradient">Collection</span></h2>
+      <p class="text-gray-400 max-w-xl mx-auto">Browse our signature pieces. Use the search below to find your perfect treasure.</p>
+    </div>
+
+    <!-- Search bar -->
+    <div class="max-w-2xl mx-auto mb-12">
+      <div class="relative">
+        <svg class="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" stroke-linecap="round" />
+        </svg>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search by name or description…"
+          class="w-full bg-ink border border-inkborder focus:border-gold rounded-full pl-14 pr-5 py-4 text-white placeholder-gray-500 outline-none transition-colors"
+          autocomplete="off"
+        />
+      </div>
+      <p id="resultCount" class="text-center text-gray-500 text-sm mt-4"></p>
+    </div>
+
+    <!-- Product grid -->
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="hidden text-center py-20">
+      <p class="font-serif text-3xl text-gray-400 mb-2">No pieces found</p>
+      <p class="text-gray-500">Try a different search term.</p>
+    </div>
+  </main>
+
+  <!-- =====================  ABOUT  ===================== -->
+  <section id="about" class="border-t border-inkborder bg-ink/40">
+    <div class="max-w-5xl mx-auto px-5 sm:px-8 py-20 grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <h2 class="font-serif text-4xl sm:text-5xl mb-5">The <span class="text-gold-gradient">Vlad’s</span> Standard</h2>
+        <p class="text-gray-300 leading-relaxed mb-4">
+          For us, jewelry is more than adornment — it is artistry passed through generations.
+          Every piece in our collection is selected and finished by hand, using only the finest
+          gold, platinum, and ethically sourced gemstones.
+        </p>
+        <p class="text-gray-400 leading-relaxed">
+          Whether you are marking a milestone or simply treating yourself, Vlad’s Jewelers
+          brings you craftsmanship that lasts a lifetime.
+        </p>
+        <div class="flex gap-10 mt-8">
+          <div><p class="font-serif text-4xl text-gold">25+</p><p class="text-gray-400 text-sm">Years of Craft</p></div>
+          <div><p class="font-serif text-4xl text-gold">100%</p><p class="text-gray-400 text-sm">Hand-Finished</p></div>
+          <div><p class="font-serif text-4xl text-gold">∞</p><p class="text-gray-400 text-sm">Lifetime Care</p></div>
+        </div>
+      </div>
+      <div class="rounded-2xl overflow-hidden border border-inkborder">
+        <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=80" alt="Jeweler at work" class="w-full h-full object-cover" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================  CONTACT / FOOTER  ===================== -->
+  <footer id="contact" class="border-t border-inkborder">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 py-16 grid md:grid-cols-3 gap-10">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gold text-gold font-serif">V</span>
+          <span class="font-serif text-xl">Vlad’s <span class="text-gold-gradient">Jewelers</span></span>
+        </div>
+        <p class="text-gray-400 text-sm leading-relaxed">Fine jewelry &amp; timepieces, handcrafted with passion. Timeless pieces for life’s most precious moments.</p>
+      </div>
+      <div>
+        <h3 class="text-gold tracking-wide mb-4 text-sm uppercase">Get in Touch</h3>
+        <ul class="space-y-2 text-gray-400 text-sm">
+          <li><a href="mailto:vlad@example.com" class="hover:text-gold transition-colors">vlad@example.com</a></li>
+          <li><a href="https://venmo.com/u/Vlads-Jewelers" target="_blank" rel="noopener" class="hover:text-gold transition-colors">Venmo: @Vlads-Jewelers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-gold tracking-wide mb-4 text-sm uppercase">Explore</h3>
+        <ul class="space-y-2 text-gray-400 text-sm">
+          <li><a href="#collection" class="hover:text-gold transition-colors">Collection</a></li>
+          <li><a href="#about" class="hover:text-gold transition-colors">About Us</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-inkborder">
+      <div class="max-w-7xl mx-auto px-5 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-gray-500 text-sm">
+        <p>© <span id="year"></span> Vlad’s Jewelers. All rights reserved.</p>
+        <!-- Subtle hidden admin access: the diamond icon. Tap/click to open the admin login. -->
+        <button id="adminTrigger" title="•" aria-label="Admin access"
+          class="text-gray-700 hover:text-gold transition-colors text-lg leading-none select-none">
+          ◆
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =====================  ADMIN LOGIN MODAL  ===================== -->
+  <div id="loginModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/70 modal-backdrop p-4">
+    <div class="bg-ink border border-inkborder rounded-2xl w-full max-w-md p-8 relative shadow-2xl">
+      <button data-close-login class="absolute top-4 right-4 text-gray-500 hover:text-gold text-2xl leading-none">&times;</button>
+      <h3 class="font-serif text-3xl mb-2">Admin <span class="text-gold-gradient">Access</span></h3>
+      <p class="text-gray-400 text-sm mb-6">Restricted area. Please enter your credentials.</p>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Username</label>
+          <input id="adminUsername" type="text" autocomplete="off"
+            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
+        </div>
+        <p id="loginError" class="hidden text-red-400 text-sm">Access denied. Invalid username.</p>
+        <button type="submit" class="w-full py-3 rounded-lg bg-gold text-charcoal font-semibold hover:bg-champagne transition-colors">Unlock Dashboard</button>
+      </form>
+      <p class="text-gray-600 text-xs mt-4 text-center">Hint: this panel belongs to the owner.</p>
+    </div>
+  </div>
+
+  <!-- =====================  ADMIN DASHBOARD MODAL  ===================== -->
+  <div id="adminModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/70 modal-backdrop p-4 overflow-y-auto">
+    <div class="bg-ink border border-gold/40 rounded-2xl w-full max-w-2xl p-8 my-8 relative shadow-2xl shadow-gold/10">
+      <button data-close-admin class="absolute top-4 right-4 text-gray-500 hover:text-gold text-2xl leading-none">&times;</button>
+
+      <div class="flex items-center gap-3 mb-1">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gold text-charcoal font-serif">V</span>
+        <h3 class="font-serif text-3xl">Vlad’s <span class="text-gold-gradient">Dashboard</span></h3>
+      </div>
+      <p class="text-gray-400 text-sm mb-6">Add a new piece to the collection. It will appear instantly and persist on this device.</p>
+
+      <form id="addProductForm" class="grid sm:grid-cols-2 gap-4">
+        <div class="sm:col-span-2">
+          <label class="block text-sm text-gray-400 mb-1">Title</label>
+          <input name="title" required type="text" placeholder="18k Gold Diamond Eternity Ring"
+            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Price (USD)</label>
+          <input name="price" required type="number" min="0" step="0.01" placeholder="2450"
+            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Image URL</label>
+          <input name="image" required type="url" placeholder="https://…"
+            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-sm text-gray-400 mb-1">Description</label>
+          <textarea name="description" required rows="3" placeholder="A brilliant band of channel-set diamonds…"
+            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors resize-none"></textarea>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-sm text-gray-400 mb-1">Venmo Link <span class="text-gray-600">(optional — defaults to @Vlads-Jewelers)</span></label>
+          <input name="venmo" type="url" placeholder="https://venmo.com/u/Vlads-Jewelers"
+            class="w-full bg-charcoal border border-inkborder focus:border-gold rounded-lg px-4 py-3 outline-none transition-colors" />
+        </div>
+        <div class="sm:col-span-2 flex flex-col sm:flex-row gap-3 mt-2">
+          <button type="submit" class="flex-1 py-3 rounded-lg bg-gold text-charcoal font-semibold hover:bg-champagne transition-colors">Add Product</button>
+          <button type="button" id="logoutBtn" class="px-6 py-3 rounded-lg border border-inkborder text-gray-300 hover:border-red-400 hover:text-red-400 transition-colors">Log Out</button>
+        </div>
+      </form>
+
+      <div class="mt-6 pt-6 border-t border-inkborder">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-sm text-gray-400">Custom products you’ve added (<span id="customCount">0</span>)</p>
+          <button id="resetBtn" class="text-xs text-gray-500 hover:text-red-400 transition-colors">Reset to defaults</button>
+        </div>
+        <p class="text-gray-600 text-xs">Seed products cannot be removed; your additions are stored in this browser’s localStorage.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gold text-charcoal font-medium px-6 py-3 rounded-full shadow-lg shadow-gold/30"></div>
+
+  <!-- =====================  JAVASCRIPT  ===================== -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ---------- Configuration ---------- */
+    const OWNER = {
+      venmo: 'https://venmo.com/u/Vlads-Jewelers', // default Venmo profile
+      email: 'vlad@example.com',                   // default inquiry email
+      adminUsername: 'vlad',                       // case-insensitive; "Vlad" unlocks the panel
+    };
+    const STORAGE_KEY = 'vlads_custom_products';   // localStorage key for admin-added products
+
+    /* ---------- Seed data: 10 high-end jewelry products ---------- */
+    /* Images are reliable Unsplash CDN URLs sized for cards. */
+    const SEED_PRODUCTS = [
+      {
+        id: 'seed-1',
+        title: '18k Gold Diamond Eternity Ring',
+        price: 2950,
+        description: 'A radiant full band of channel-set brilliant-cut diamonds in solid 18k yellow gold — a timeless symbol of forever.',
+        image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-2',
+        title: 'Classic Sapphire Pendant',
+        price: 1680,
+        description: 'A deep blue Ceylon sapphire framed by a halo of micro-pavé diamonds, suspended on a delicate white-gold chain.',
+        image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-3',
+        title: 'Handcrafted Platinum Bangle',
+        price: 3400,
+        description: 'A sculptural solid platinum bangle, hand-polished to a mirror finish for understated, enduring elegance.',
+        image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-4',
+        title: 'Swiss Automatic Chronograph',
+        price: 5200,
+        description: 'Precision Swiss automatic movement housed in a 41mm stainless steel case with a sapphire crystal and gold accents.',
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-5',
+        title: 'Emerald Solitaire Engagement Ring',
+        price: 4750,
+        description: 'A vivid emerald-cut green emerald set in a refined platinum solitaire mount — striking, rare, and unforgettable.',
+        image: 'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-6',
+        title: 'Pearl &amp; Diamond Drop Earrings',
+        price: 1290,
+        description: 'Lustrous South Sea pearls paired with sparkling diamond accents in 18k white gold — graceful drop earrings for any occasion.',
+        image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-7',
+        title: 'Rose Gold Tennis Bracelet',
+        price: 3850,
+        description: 'A continuous line of round brilliant diamonds set in warm 18k rose gold — the definitive everyday luxury bracelet.',
+        image: 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-8',
+        title: 'Vintage Ruby Cocktail Ring',
+        price: 2200,
+        description: 'A bold Burmese ruby encircled by old-European-cut diamonds in a hand-engraved yellow gold setting. Pure vintage drama.',
+        image: 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-9',
+        title: 'Diamond Station Necklace',
+        price: 1950,
+        description: 'Seven bezel-set diamonds float along a fine 18k gold cable chain — effortless sparkle that layers beautifully.',
+        image: 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?auto=format&fit=crop&w=800&q=80',
+      },
+      {
+        id: 'seed-10',
+        title: 'Men’s Onyx Signet Ring',
+        price: 1120,
+        description: 'A polished black onyx face set in substantial 14k gold — a modern heirloom signet with quiet confidence.',
+        image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?auto=format&fit=crop&w=800&q=80',
+      },
+    ];
+
+    /* ---------- State ---------- */
+    let customProducts = loadCustomProducts(); // newest-first array from localStorage
+    let allProducts = [];                      // combined list (custom prepended)
+    let isAdmin = false;
+
+    /* ---------- DOM references ---------- */
+    const grid = document.getElementById('productGrid');
+    const emptyState = document.getElementById('emptyState');
+    const searchInput = document.getElementById('searchInput');
+    const resultCount = document.getElementById('resultCount');
+
+    const loginModal = document.getElementById('loginModal');
+    const adminModal = document.getElementById('adminModal');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const adminUsernameInput = document.getElementById('adminUsername');
+    const addProductForm = document.getElementById('addProductForm');
+    const customCountEl = document.getElementById('customCount');
+    const toast = document.getElementById('toast');
+
+    /* ---------- Utilities ---------- */
+    function loadCustomProducts() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.warn('Could not read stored products:', e);
+        return [];
+      }
+    }
+
+    function saveCustomProducts() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(customProducts));
+      } catch (e) {
+        console.warn('Could not save products:', e);
+        showToast('Could not save — storage unavailable.');
+      }
+    }
+
+    function rebuildAllProducts() {
+      // Custom (admin-added) products are prepended, newest first.
+      allProducts = [...customProducts, ...SEED_PRODUCTS];
+    }
+
+    function formatPrice(value) {
+      const n = Number(value) || 0;
+      return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    // Escape user/seed text before injecting into HTML to prevent broken markup / XSS.
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Decode the few named entities we deliberately put in seed data (e.g. &amp;) for matching/searching.
+    function decodeEntities(str) {
+      const txt = document.createElement('textarea');
+      txt.innerHTML = str;
+      return txt.value;
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.add('hidden'), 2600);
+    }
+
+    /* ---------- Rendering ---------- */
+    function renderProducts(list) {
+      grid.innerHTML = '';
+
+      if (!list.length) {
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+
+      list.forEach((p, i) => {
+        const name = decodeEntities(p.title);
+        const venmoUrl = p.venmo && p.venmo.trim() ? p.venmo.trim() : OWNER.venmo;
+        const mailto = 'mailto:' + OWNER.email +
+          '?subject=' + encodeURIComponent('Inquiry: ' + name);
+
+        const card = document.createElement('article');
+        card.className = 'product-card fade-up bg-ink border border-inkborder rounded-2xl overflow-hidden flex flex-col';
+        card.style.animationDelay = (i * 0.04) + 's';
+
+        card.innerHTML = `
+          <div class="relative overflow-hidden aspect-[4/3] bg-charcoal">
+            <img src="${escapeHtml(p.image)}" alt="${escapeHtml(name)}" loading="lazy"
+              class="w-full h-full object-cover"
+              onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=80';" />
+            <span class="absolute top-3 right-3 bg-charcoal/80 backdrop-blur text-gold text-sm font-semibold px-3 py-1 rounded-full border border-gold/40">
+              ${formatPrice(p.price)}
+            </span>
+          </div>
+          <div class="p-6 flex flex-col flex-1">
+            <h3 class="font-serif text-2xl mb-2 leading-snug">${escapeHtml(name)}</h3>
+            <p class="text-gray-400 text-sm leading-relaxed flex-1">${escapeHtml(decodeEntities(p.description))}</p>
+            <div class="flex gap-3 mt-6">
+              <a href="${escapeHtml(venmoUrl)}" target="_blank" rel="noopener"
+                class="flex-1 text-center py-2.5 rounded-lg bg-gold text-charcoal font-semibold text-sm hover:bg-champagne transition-colors">
+                Buy via Venmo
+              </a>
+              <a href="${escapeHtml(mailto)}"
+                class="flex-1 text-center py-2.5 rounded-lg border border-gold/60 text-gold font-medium text-sm hover:bg-gold hover:text-charcoal transition-colors">
+                Inquire via Email
+              </a>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function applySearch() {
+      const q = searchInput.value.trim().toLowerCase();
+      const filtered = !q ? allProducts : allProducts.filter((p) => {
+        const hay = (decodeEntities(p.title) + ' ' + decodeEntities(p.description)).toLowerCase();
+        return hay.includes(q);
+      });
+
+      renderProducts(filtered);
+
+      const total = allProducts.length;
+      resultCount.textContent = q
+        ? `Showing ${filtered.length} of ${total} pieces`
+        : `Showing all ${total} pieces`;
+    }
+
+    /* ---------- Admin: login / logout ---------- */
+    function openLogin() {
+      loginError.classList.add('hidden');
+      adminUsernameInput.value = '';
+      loginModal.classList.remove('hidden');
+      loginModal.classList.add('flex');
+      setTimeout(() => adminUsernameInput.focus(), 50);
+    }
+    function closeLogin() {
+      loginModal.classList.add('hidden');
+      loginModal.classList.remove('flex');
+    }
+    function openAdmin() {
+      updateCustomCount();
+      adminModal.classList.remove('hidden');
+      adminModal.classList.add('flex');
+    }
+    function closeAdmin() {
+      adminModal.classList.add('hidden');
+      adminModal.classList.remove('flex');
+    }
+    function updateCustomCount() {
+      customCountEl.textContent = customProducts.length;
+    }
+
+    /* ---------- Event wiring ---------- */
+
+    // Hidden admin trigger (diamond in footer)
+    document.getElementById('adminTrigger').addEventListener('click', () => {
+      if (isAdmin) { openAdmin(); } else { openLogin(); }
+    });
+
+    // Secret key combo as an alternative: Ctrl/Cmd + Shift + V
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'V' || e.key === 'v')) {
+        e.preventDefault();
+        if (isAdmin) { openAdmin(); } else { openLogin(); }
+      }
+      if (e.key === 'Escape') { closeLogin(); closeAdmin(); }
+    });
+
+    // Login submit
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const entered = adminUsernameInput.value.trim().toLowerCase();
+      if (entered === OWNER.adminUsername) {
+        isAdmin = true;
+        closeLogin();
+        openAdmin();
+        showToast('Welcome back, Vlad ✦');
+      } else {
+        loginError.classList.remove('hidden');
+      }
+    });
+
+    // Close buttons + backdrop clicks
+    document.querySelectorAll('[data-close-login]').forEach((b) => b.addEventListener('click', closeLogin));
+    document.querySelectorAll('[data-close-admin]').forEach((b) => b.addEventListener('click', closeAdmin));
+    loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeLogin(); });
+    adminModal.addEventListener('click', (e) => { if (e.target === adminModal) closeAdmin(); });
+
+    // Add product
+    addProductForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(addProductForm);
+      const product = {
+        id: 'custom-' + Date.now(),
+        title: String(fd.get('title')).trim(),
+        price: Number(fd.get('price')) || 0,
+        description: String(fd.get('description')).trim(),
+        image: String(fd.get('image')).trim(),
+        venmo: String(fd.get('venmo') || '').trim(),
+      };
+
+      if (!product.title || !product.image || !product.description) {
+        showToast('Please fill in all required fields.');
+        return;
+      }
+
+      customProducts.unshift(product); // prepend → appears first in gallery
+      saveCustomProducts();
+      rebuildAllProducts();
+      searchInput.value = '';          // clear search so the new item is visible
+      applySearch();
+      updateCustomCount();
+      addProductForm.reset();
+      showToast('Product added to the collection ✦');
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      isAdmin = false;
+      closeAdmin();
+      showToast('Logged out.');
+    });
+
+    // Reset to default seed products
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (!confirm('Remove all custom products and reset to the default collection?')) return;
+      customProducts = [];
+      saveCustomProducts();
+      rebuildAllProducts();
+      applySearch();
+      updateCustomCount();
+      showToast('Collection reset to defaults.');
+    });
+
+    // Live search
+    searchInput.addEventListener('input', applySearch);
+
+    /* ---------- Init ---------- */
+    document.getElementById('year').textContent = new Date().getFullYear();
+    rebuildAllProducts();
+    applySearch();
+  })();
+  </script>
+</body>
+</html>
